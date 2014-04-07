@@ -91,7 +91,10 @@ namespace Backup
 
             int files = job.Start(configuration, targetDirectory);
 
-            MessageBox.Show(string.Format("Backup abgeschlossen, {0} Dateien in {1} Sekunden", files, (job.EndTime - job.StartTime).TotalSeconds));
+            MessageBox.Show(string.Format("Backup abgeschlossen, {0} Dateien in {1} Sekunden, {2} Fehler", 
+                files, 
+                (job.EndTime - job.StartTime).TotalSeconds, 
+                job.NumberOfErrors));
         }
 
         private void buttonRecoveryFile_Click(object sender, EventArgs e)

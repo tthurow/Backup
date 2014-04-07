@@ -28,8 +28,12 @@ namespace Backup
         int savedFiles;
         DateTime startTime;
         DateTime endTime;
+        StreamWriter logFile;
+        int numberOfErrors;
 
         public int SavedFiles { get { return savedFiles; } }
+
+        public int NumberOfErrors { get { return numberOfErrors; } }
 
         public DateTime StartTime { get { return startTime; } }
 
@@ -43,6 +47,8 @@ namespace Backup
 
             DateTime dateTime = DateTime.Now;
             string directoryName = dateTime.ToString("MM-dd-yy H-mm-ss");
+            logFile = new StreamWriter("Log_" + directoryName + ".txt");
+
 //            this.targetPath = "\\\\?\\" + targetPath + '\\' + directoryName;
             this.targetPath = targetPath + '\\' + directoryName;
 
@@ -55,18 +61,38 @@ namespace Backup
 
             this.endTime = DateTime.Now;
 
+            logFile.Close();
+
             return savedFiles;
         }
 
         void CheckDirectory(string directoryPath)
         {
-            string[] directories = Directory.GetDirectories(directoryPath);
-            foreach (string directory in directories)
-                CheckDirectory(directory);
+            try
+            {
+                string[] directories = Directory.GetDirectories(directoryPath);
+                foreach (string directory in directories)
+                    CheckDirectory(directory);
+            }
+            catch(Exception e)
+            {
+                logFile.WriteLine(string.Format("Error read directorys in {0}, exception {1}", directoryPath, e.ToString()));
+                logFile.Flush();
+                numberOfErrors++;
+            }
 
-            string[] files = Directory.GetFiles(directoryPath);
-            foreach (string file in files)
-                CheckFile(file);
+            try
+            {
+                string[] files = Directory.GetFiles(directoryPath);
+                foreach (string file in files)
+                    CheckFile(file);
+            }
+            catch (Exception e)
+            {
+                logFile.WriteLine(string.Format("Error read files in {0}, exception {1}", directoryPath, e.ToString()));
+                logFile.Flush();
+                numberOfErrors++;
+            }
         }
 
         void CheckFile(string sourceFileName)
